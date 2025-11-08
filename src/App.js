@@ -16,53 +16,52 @@ const App = () => {
         if (!res.ok) throw new Error("Failed to fetch countries");
         return res.json();
       })
-      .then((data) => setCountries(data))
-      .catch((err) => setError(err.message || "Something went wrong"));
+      .then((data) => {
+        setCountries(data);
+        setError(""); // clear error if success
+      })
+      .catch(() => setError("Failed to fetch countries"));
   }, []);
 
   // Fetch states based on selected country
   useEffect(() => {
     if (!selCountry) return;
     setError("");
-
     fetch(`https://location-selector.labs.crio.do/country=${selCountry}/states`)
-    
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch states");
         return res.json();
       })
-      .then((data) => setStates(data))
-      .catch((err) => setError(err.message || "Something went wrong"));
+      .then((data) => {
+        setStates(data);
+        setError(""); // clear any previous error
+      })
+      .catch(() => setError("Failed to fetch states"));
   }, [selCountry]);
 
   // Fetch cities based on selected state
   useEffect(() => {
     if (!selCountry || !selState) return;
     setError("");
-
     fetch(
-  `https://location-selector.labs.crio.do/country=${encodeURIComponent(selCountry)}/state=${encodeURIComponent(selState)}/cities`
-)
+      `https://location-selector.labs.crio.do/country=${encodeURIComponent(
+        selCountry
+      )}/state=${encodeURIComponent(selState)}/cities`
+    )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch cities");
         return res.json();
       })
-      .then((data) => setCities(data))
-      .catch((err) => setError(err.message || "Something went wrong"));
+      .then((data) => {
+        setCities(data);
+        setError("");
+      })
+      .catch(() => setError("Failed to fetch cities"));
   }, [selCountry, selState]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "20px",
-      }}
-    >
-      <h1 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "20px" }}>
-        Select Location
-      </h1>
+    <div style={{ textAlign: "center", marginTop: "30px" }}>
+      <h1>City Selector</h1>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
@@ -80,7 +79,7 @@ const App = () => {
         >
           <option value="">Select Country</option>
           {countries.map((country) => (
-            <option value={country} key={country}>
+            <option key={country} value={country}>
               {country}
             </option>
           ))}
@@ -98,7 +97,7 @@ const App = () => {
         >
           <option value="">Select State</option>
           {states.map((state) => (
-            <option value={state} key={state}>
+            <option key={state} value={state}>
               {state}
             </option>
           ))}
@@ -112,7 +111,7 @@ const App = () => {
         >
           <option value="">Select City</option>
           {cities.map((city) => (
-            <option value={city} key={city}>
+            <option key={city} value={city}>
               {city}
             </option>
           ))}
@@ -120,13 +119,9 @@ const App = () => {
       </div>
 
       <div style={{ marginTop: "20px", fontWeight: "bold" }}>
-        {selCity && selState && selCountry ? (
-          <p>
-            You selected {selCity}, {selState}, {selCountry}
-          </p>
-        ) : (
-          <p>Please select a location</p>
-        )}
+        {selCountry && selState && selCity
+          ? `You selected ${selCity}, ${selState}, ${selCountry}`
+          : "Please select a location"}
       </div>
     </div>
   );
